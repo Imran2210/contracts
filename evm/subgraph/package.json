@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "codegen": "graph codegen",
-    "build": "graph build",
+    "build": "node init && graph build",
     "test": "graph test --version 0.6.0",
     "test:coverage": "graph test --coverage --version 0.6.0",
     "deploy": "graph deploy",
