@@ -34,7 +34,8 @@ if the two disagree.
           "name": "ERC5564Announcer", // contract, crate or Anchor program name
           "id": "0x8AE6…", // address / contract ID / program ID / code hash
           "version": "0.1.0", // package or crate version, null if unknown
-          "sourceCommit": "…", // 40-hex git commit, null if unknown
+          "sourceCommit": "…", // full 40-hex git commit; null only when unverifiable
+          "provenance": { "status": "source-verified" }, // or { "status": "unverifiable", "reason": "…" }
           "artifactHash": { "algorithm": "keccak256", "value": "0x…" },
           "abi": { "path": "evm/subgraph/abis/ERC5564Announcer.json", "sha256": "0x…" },
           "deployment": {
@@ -68,10 +69,57 @@ so formatting does not matter). Solana programs carry `solana.programData` and
 `solana.upgradeAuthority`. CKB scripts carry `ckb.hashType` and `ckb.cellDep`, and
 `external: true` marks third-party scripts Wraith depends on (ckb-auth).
 
+### Every supported contract needs an explicit record
+
+For EVM, a network's record must account for every contract the repository supports
+(`ERC5564Announcer`, `ERC6538Registry`, `WraithSender`, `WraithNames`,
+`WraithWithdrawer`; the list is `EXPECTED_CONTRACTS` in
+[`catalogue.ts`](../scripts/deployment-manifest/src/catalogue.ts)). Each one is either:
+
+- in `contracts`, with its deployment transaction (`deployment.txHash`), block
+  (`deployment.height`), `artifactHash` and `abi` (path and canonical hash), or
+- in `undeployed`, with a reason:
+
+```jsonc
+"undeployed": [
+  { "name": "WraithSender", "reason": "Not deployed on horizen-testnet yet." }
+]
+```
+
+A name in both lists, a name that is not a supported contract, or a supported contract
+in neither list fails `npm run check`, `npm run build` and `npm run verify`. Recording a
+contract removes it from `undeployed`.
+
 `recordedBy: "chain-query"` means the record was reconstructed from chain state after
-the fact, so `sourceCommit` and `version` may be `null`. The current EVM, Solana and CKB
-records are of this kind: they predate the manifest. Records written by a deploy script
-must carry a source commit.
+the fact.
+
+### Source provenance
+
+Every first-party contract carries `provenance`:
+
+- `source-verified`: `sourceCommit` is a full 40-hex commit and building it reproduces
+  `artifactHash`. `npm run verify-source` rebuilds and checks this (EVM via Hardhat,
+  Stellar via the `stellar/deploy.sh` build; contracts with Solidity immutables are
+  compared against the deployed code everywhere except the immutable slots).
+- `unverifiable`: a historical record. `sourceCommit` is `null` and `reason` says why.
+  The current EVM, Solana and CKB records are of this kind, because they predate the
+  manifest and no build has been shown to reproduce them. Solana and CKB have no
+  reproducible build yet, so they cannot be source-verified.
+
+Records written by a deploy script must be `source-verified`: `record` rejects a missing
+or malformed `--source-commit` (only `HEAD` or a full hash), a working tree with
+uncommitted changes, and a commit whose build does not reproduce the artifact hash.
+Re-recording unchanged bytecode keeps its existing provenance; changed bytecode resets
+it to `unverifiable` unless a commit is supplied.
+
+To upgrade a historical record, prove the commit offline:
+
+```bash
+npm run attest -- evm --network horizen-testnet --contract ERC5564Announcer --search
+npm run attest -- evm --network horizen-testnet --contract ERC5564Announcer --commit <full sha>
+```
+
+A record is only changed when a build reproduces the recorded hash.
 
 ## Consumers
 
@@ -116,6 +164,10 @@ npm run record -- ckb --network ckb-testnet --rpc https://testnet.ckbapp.dev \
 
 npm run record -- evm --network horizen-testnet --rpc <rpc> \
   --contract WraithSender=<address>@<deploy tx hash>
+
+# a supported contract that is not deployed on this network
+npm run record -- evm --network horizen-testnet --rpc <rpc> \
+  --undeployed WraithNames="Not deployed on horizen-testnet yet."
 ```
 
 `record` reads heights and artifact hashes from the chain, merges into the existing
@@ -142,13 +194,15 @@ it names; `npm run deploy` and `npm run deploy-local` in `evm/subgraph` run it b
 
 ## Commands
 
-| Command            | What it does                                                                                    |
-| ------------------ | ----------------------------------------------------------------------------------------------- |
-| `npm run build`    | Validate records, write `manifest.json`, regenerate the generated consumers.                    |
-| `npm run check`    | Offline validation of records, manifest and consumers. Runs in CI.                              |
-| `npm run verify`   | Re-read every deployment from its chain and compare IDs, heights and hashes. Runs weekly in CI. |
-| `npm run subgraph` | Write `evm/subgraph/subgraph.yaml` for `--network <slug>`; `--check` verifies it.               |
-| `npm test`         | Unit and end-to-end tests for the tool.                                                         |
+| Command                 | What it does                                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `npm run build`         | Validate records, write `manifest.json`, regenerate the generated consumers.                    |
+| `npm run check`         | Offline validation of records, manifest and consumers. Runs in CI.                              |
+| `npm run verify-source` | Rebuild each source-verified contract from its commit and compare artifact hashes.              |
+| `npm run attest`        | Backfill: mark a historical record source-verified once a commit reproduces it.                 |
+| `npm run verify`        | Re-read every deployment from its chain and compare IDs, heights and hashes. Runs weekly in CI. |
+| `npm run subgraph`      | Write `evm/subgraph/subgraph.yaml` for `--network <slug>`; `--check` verifies it.               |
+| `npm test`              | Unit and end-to-end tests for the tool.                                                         |
 
 ## Stellar testnet
 
