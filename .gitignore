@@ -32,3 +32,4 @@ node_modules/
 dist/
 .gitignore
 branch_structure.json
+config.bat
