@@ -5,7 +5,7 @@ import type { Chain } from './manifest.js';
  * deployed in the README and to keep stellar/contract-ids.json keyed by crate.
  */
 export const EXPECTED_CONTRACTS: Record<Chain, string[]> = {
-  evm: ['ERC5564Announcer', 'ERC6538Registry', 'WraithSender', 'WraithNames', 'WraithWithdrawer'],
+  evm: ['ERC5164Announcer', 'ERC6538Registry', 'WraithSender', 'WraithNames', 'WraithWithdrawer'],
   stellar: ['stealth-announcer', 'stealth-registry', 'stealth-sender', 'wraith-names'],
   solana: ['wraith_announcer', 'wraith_sender', 'wraith_names'],
   ckb: ['wraith-stealth-lock', 'wraith-names-type'],
@@ -16,7 +16,7 @@ export const EXPECTED_CONTRACTS: Record<Chain, string[]> = {
  * each one is either recorded under `contracts` or listed under `undeployed`.
  * EVM is the first; add a chain here once its records are complete.
  */
-export const EXPLICIT_COVERAGE_CHAINS: Chain[] = ['evm'];
+export const EXPLICIT_COVERAGE_CHAINS: Chain[] = ['evm', 'stellar'];
 
 export const CHAIN_LABEL: Record<Chain, string> = {
   evm: 'EVM',
@@ -39,7 +39,7 @@ export const HEIGHT_LABEL: Record<Chain, string> = {
   ckb: 'Block',
 };
 
-/** The Stellar network whose IDs stellar/contract-ids.json (and the TS bindings) use. */
+/** The Stellar network whose IDs stellar/contract-ids.json (and the TS bindings) use. Must match the manifest's stellar network key. */
 export const STELLAR_BINDINGS_NETWORK = 'stellar-testnet';
 
 export const EVM_PLACEHOLDER_ADDRESS = '0x000000000000000000000000000000000000dead';
