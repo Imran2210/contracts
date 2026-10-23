@@ -13,6 +13,7 @@ evm/subgraph/generated/
 evm/subgraph/build/
 evm/results.sarif
 
+temp_auto_push.bat
 # Stellar
 stellar/target/
 stellar/node_modules/
@@ -29,3 +30,5 @@ ckb/build/
 # Root Node/TS Build & Dependencies
 node_modules/
 dist/
+.gitignore
+branch_structure.json
