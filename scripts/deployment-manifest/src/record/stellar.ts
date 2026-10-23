@@ -8,11 +8,11 @@ import { jsonRpc } from './rpc.js';
 // XDR enum values from Stellar-ledger-entries.x / Stellar-contract.x.
 const LEDGER_ENTRY_CONTRACT_DATA = 6;
 const SC_ADDRESS_CONTRACT = 1;
-const SCV_LEDGER_KEY_CONTRACT_INSTANCE = 20;
+const SCV_LEGDER_KEY_CONTRACT_INSTANCE = 20;
 const DURABILITY_PERSISTENT = 1;
 
 const i32be = (n: number) =>
-  Uint8Array.of((n >>> 24) & 0xff, (n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff);
+  Uint8Array.of((n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff);
 
 /** XDR LedgerKey for a contract's instance entry, base64 encoded for getLedgerEntries. */
 export function contractInstanceKey(contractId: string): string {
@@ -21,7 +21,7 @@ export function contractInstanceKey(contractId: string): string {
       ...i32be(LEDGER_ENTRY_CONTRACT_DATA),
       ...i32be(SC_ADDRESS_CONTRACT),
       ...decodeStellarContractId(contractId),
-      ...i32be(SCV_LEDGER_KEY_CONTRACT_INSTANCE),
+      ...i32be(SCV_LEGDER_KEY_CONTRACT_INSTANCE),
       ...i32be(DURABILITY_PERSISTENT),
     ]),
   );
@@ -68,15 +68,34 @@ export async function recordStellarContract(
   const entry = await stellarInstance(rpc, target.contractId);
   if (!entry) throw new Error(`${target.name}: no instance entry for ${target.contractId}`);
 
+  const wasmHash = wasmHashFromInstanceEntry(entry.xdr);
+  if (!wasmHash) {
+    throw new Error(`${target.name}: could not decode WASM hash from instance entry`);
+  }
+
+  const artifactHash = {
+    algorithm: 'sha256' as const,
+    value: sha256Hex(fs.readFileSync(target.wasmPath)),
+  };
+  if (artifactHash.value.toLowerCase() !== wasmHash.toLowerCase()) {
+    throw new Error(
+      `${target.name}: WASM hash mismatch (on-chain ${wasmHash}, local ${artifactHash.value})`,
+    );
+  }
+
   return {
     name: target.name,
     id: target.contractId,
-    artifactHash: { algorithm: 'sha256', value: sha256Hex(fs.readFileSync(target.wasmPath)) },
-    deployment: {
+    artifactHash,
+    deployment:{
       height: entry.lastModifiedLedgerSeq,
       txHash: null,
       deployer: target.deployer ?? null,
       timestamp: null,
+    },
+    stellar: {
+      wasmHash,
+      deployLedger: entry.lastModifiedLedgerSeq,
     },
   };
 }

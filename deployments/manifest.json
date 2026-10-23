@@ -1,6 +1,7 @@
 {
+  "$role": "deployment-manifest",
   "$schema": "./schema/v1.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "deployments": [
     {
       "chain": "evm",
@@ -82,7 +83,7 @@
       "contracts": [
         {
           "name": "wraith_announcer",
-          "id": "9Ko7TuXHpLUH1ZsZWQEpeA9Tv7hX325ooWk5SD7Y9nuq",
+          "id": "9Ko7TuXHpLUX1ZsZWQEpeA9Tv7hX325ooWk5SD7Y9nuq",
           "version": null,
           "sourceCommit": null,
           "provenance": {
@@ -239,6 +240,69 @@
               "txHash": "0xa0e99b29fd154385815142b76668d5f4ecf30ae85bc2942bd21e9e51b9066f97",
               "index": 0,
               "depType": "code"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "chain": "stellar",
+      "network": "stellar-testnet",
+      "networkId": "Test SDF Network ; September 2015",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "recordedBy": "chain-query",
+      "contracts": [
+        {
+          "name": "wraith-announcer",
+          "id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMPQVU2HHGCYSC",
+          "version": null,
+          "sourceCommit": null,
+          "provenance": {
+            "status": "unverifiable",
+            "reason": "Historical record reconstructed from chain state; no source commit has been shown to reproduce the artifact hash."
+          },
+          "artifactHash": {
+            "algorithm": "sha256",
+            "value": "0x2be5d2b1e9d08926ab515829c7f72b16367f59a8b0fd4241318762dd184dec67"
+          },
+          "deployment": {
+            "height": 456215445,
+            "txHash": null,
+            "deployer": "C8Qaq6WeAjhSizcEMFstN2BaAp15ypR76bfvhX6skDvG",
+            "timestamp": "2026-04-17T18:59:39Z"
+          },
+          "stellar": {
+            "wasmHash": "0x2be5d2b1e9d08926ab515829c7f72b16367f59a8b0fd4241318762dd184dec67",
+            "governance": {
+              "admin": "C8Qaq6WeAjhSizcEMFstN2BaAp15ypR76bfvhX6skDvG",
+              "upgradeAuthority": "C8Qaq6WeAjhSizcEMFstN2BaAp15ypR76bfvhX6skDvG"
+            }
+          }
+        },
+        {
+          "name": "wraith-sender",
+          "id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMPQVU2HHGCYSC",
+          "version": null,
+          "sourceCommit": null,
+          "provenance": {
+            "status": "unverifiable",
+            "reason": "Historical record reconstructed from chain state; no source commit has been shown to reproduce the artifact hash."
+          },
+          "artifactHash": {
+            "algorithm": "sha256",
+            "value": "0x2be5d2b1e9d08926ab515829c7f72b16367f59a8b0fd4241318762dd184dec67"
+          },
+          "deployment": {
+            "height": 456215445,
+            "txHash": null,
+            "deployer": "C8Qaq6WeAjhSizcEMFstN2BaAp15ypR76bfvhX6skDvG",
+            "timestamp": "2026-04-17T18:59:39Z"
+          },
+          "stellar": {
+            "wasmHash": "0x2be5d2b1e9d08926ab515829c7f72b16367f59a8b0fd4241318762dd184dec67",
+            "governance": {
+              "admin": "C8Qaq6WeAjhSizcEMFstN2BaAp15ypR76bfvhX6skDvG",
+              "upgradeAuthority": "C8Qaq6WeAjhSizcEMFstN2BaAp15ypR76bfvhX6skDvG"
             }
           }
         }
